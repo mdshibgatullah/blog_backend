@@ -16,17 +16,19 @@ class Post extends Model
         'description',
         'popular',
         'status',
+        'trending',
     ];
 
     // Category Relationship
     public function category()
     {
-        return $table = $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
     // Tag Relationship (Many to Many)
     public function tags()
     {
-        return $this->belongsToMany(Tag::class, 'post_tag');
+        return $this->belongsToMany(Tag::class, 'post_tag', 'post_id', 'tag_id');
     }
+
 }

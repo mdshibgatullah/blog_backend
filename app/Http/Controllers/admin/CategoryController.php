@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class CategoryController extends Controller
 {
     public function index(){
-        $categories = Category::orderBy('created_at', 'DESC')->get();
-        return response()->json([
+            $categories = Category::withCount('posts')->orderBy('created_at', 'DESC')->get();        return response()->json([
             'status' => 200,
             'data' => $categories
         ]);

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('image')->nullable();
             $table->longText('description');
             $table->integer('popular')->default(0); 
+            $table->integer('trending')->default(0); 
             $table->integer('status')->default(1);  
             $table->timestamps();
         });

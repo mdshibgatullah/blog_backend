@@ -4,6 +4,7 @@ namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
@@ -28,7 +29,8 @@ class PostController extends Controller
             'category_id' => 'required',
             'title'       => 'required|string|max:255',
             'description' => 'required|string',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp'
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp',
+            'tags'        => 'nullable|array'
         ]);
 
         if ($validator->fails()) {
@@ -52,12 +54,24 @@ class PostController extends Controller
             'image'       => $imagePath,
             'description' => $request->description,
             'popular'     => $request->popular,
+            'trending'     => $request->trending,
             'status'      => $request->status
         ]);
 
         
+
         if ($request->has('tags') && is_array($request->tags)) {
-            $post->tags()->attach($request->tags);
+            $tagIds = [];
+            foreach ($request->tags as $tagName) {
+                if (!empty(trim($tagName))) {
+                    $tag = Tag::firstOrCreate([
+                        'name' => trim($tagName)
+                    ]);
+                    $tagIds[] = $tag->id;
+                }
+            }
+        
+            $post->tags()->attach($tagIds);
         }
 
         return response()->json([
@@ -116,7 +130,6 @@ class PostController extends Controller
 
         $imagePath = $post->image;
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($post->image && File::exists(public_path($post->image))) {
                 File::delete(public_path($post->image));
             }
@@ -133,12 +146,21 @@ class PostController extends Controller
             'image'       => $imagePath,
             'description' => $request->description,
             'popular'     => $request->popular,
+            'trending'     => $request->trending,
             'status'      => $request->status,
         ]);
 
-        // Sync Tags
         if ($request->has('tags') && is_array($request->tags)) {
-            $post->tags()->sync($request->tags);
+            $tagIds = [];
+            foreach ($request->tags as $tagName) {
+                if (!empty(trim($tagName))) {
+                    $tag = Tag::firstOrCreate([
+                        'name' => trim($tagName)
+                    ]);
+                    $tagIds[] = $tag->id;
+                }
+            }
+            $post->tags()->sync($tagIds);
         } else {
             $post->tags()->detach();
         }
