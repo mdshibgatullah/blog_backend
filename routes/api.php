@@ -13,6 +13,7 @@ Route::post('/admin/login', [AuthController::class, 'login']);
 
 Route::group(['middleware' => 'auth:sanctum'], function(){
     Route::resource('categories', CategoryController::class);
+    });
     Route::resource('tags', TagController::class);
-    Route::resource('posts', PostController::class);
-});
+    
+Route::resource('posts', PostController::class);

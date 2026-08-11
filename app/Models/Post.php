@@ -9,14 +9,7 @@ class Post extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'category_id',
-        'title',
-        'image',
-        'description',
-        'popular',
-        'status',
-        'trending',
+    protected $fillable = ['category_id', 'title', 'image',  'description',  'popular', 'status', 'trending',
     ];
 
     // Category Relationship
