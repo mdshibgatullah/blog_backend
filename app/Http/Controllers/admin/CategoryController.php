@@ -5,12 +5,16 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
     public function index(){
-            $categories = Category::withCount('posts')->orderBy('created_at', 'DESC')->get();        return response()->json([
+            $categories = Cache::remember('admin.categories.index', 60, function () {
+                return Category::withCount('posts')->orderBy('created_at', 'DESC')->get();
+            });
+            return response()->json([
             'status' => 200,
             'data' => $categories
         ]);
@@ -35,6 +39,9 @@ class CategoryController extends Controller
                 'name' => $request->name,
                 'status' => $request->status,
             ]);
+
+            Cache::forget('admin.categories.index');
+            Cache::forget('front.categories.index');
 
             return response()->json([
                 'status' => 200,
@@ -94,6 +101,9 @@ class CategoryController extends Controller
             'status' => $request->status,
         ]);
 
+        Cache::forget('admin.categories.index');
+            Cache::forget('front.categories.index');
+
         return response()->json([
             'status' => 200,
             'message' => 'Category updated successfully',
@@ -115,6 +125,9 @@ class CategoryController extends Controller
         }
 
         $category->delete();
+
+        Cache::forget('admin.categories.index');
+            Cache::forget('front.categories.index');
 
         return response()->json([
             'status' => 200,

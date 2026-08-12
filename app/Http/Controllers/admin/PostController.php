@@ -6,20 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
-    // Fetch all posts
+    // Fetch all posts (admin panel — draft soho shob post, kono status filter chara)
     public function index()
     {
-        $posts = Post::with(['category', 'tags'])->orderBy('created_at', 'DESC')->get();
+        $posts = Cache::remember('admin.posts.index', 60, function () {
+            return Post::with(['category', 'tags'])->orderBy('created_at', 'DESC')->get();
+        });
 
         return response()->json([
             'status' => 200,
             'data' => $posts
         ]);
+    }
+
+    // post create/update/delete hole admin cache o public (front) cache — dutoi stale hoye jay,
+    // tai ekshathe shob clear kora hocche
+    private function clearPostsCache()
+    {
+        Cache::forget('admin.posts.index');
+        Cache::forget('front.posts.index');
+        Cache::forget('front.posts.popular');
+        Cache::forget('front.posts.trending');
     }
 
     // Store a new post
@@ -73,6 +86,8 @@ class PostController extends Controller
         
             $post->tags()->attach($tagIds);
         }
+
+        $this->clearPostsCache();
 
         return response()->json([
             'status'  => 200,
@@ -165,6 +180,8 @@ class PostController extends Controller
             $post->tags()->detach();
         }
 
+        $this->clearPostsCache();
+
         return response()->json([
             'status'  => 200,
             'message' => 'Post updated successfully',
@@ -194,6 +211,8 @@ class PostController extends Controller
         // Detach tags and delete post
         $post->tags()->detach();
         $post->delete();
+
+        $this->clearPostsCache();
 
         return response()->json([
             'status'  => 200,

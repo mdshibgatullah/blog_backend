@@ -5,12 +5,15 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class TagController extends Controller
 {
     public function index(){
-        $tags = Tag::orderBy('created_at', 'DESC')->get();
+        $tags = Cache::remember('admin.tags.index', 60, function () {
+            return Tag::orderBy('created_at', 'DESC')->get();
+        });
         return response()->json([
             'status' => 200,
             'data' => $tags
@@ -35,6 +38,9 @@ class TagController extends Controller
                 'name' => $request->name,
                 'status' => $request->status,
             ]);
+
+            Cache::forget('admin.tags.index');
+        Cache::forget('front.tags.index');
 
             return response()->json([
                 'status' => 200,
@@ -92,6 +98,9 @@ class TagController extends Controller
             'name' => $request->name
         ]);
 
+        Cache::forget('admin.tags.index');
+        Cache::forget('front.tags.index');
+
         return response()->json([
             'status' => 200,
             'message' => 'Tag updated successfully',
@@ -113,6 +122,9 @@ class TagController extends Controller
         }
 
         $tag->delete();
+
+        Cache::forget('admin.tags.index');
+        Cache::forget('front.tags.index');
 
         return response()->json([
             'status' => 200,

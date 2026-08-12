@@ -18,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // sub-admin register/list/delete route gulo ei middleware diye super admin er
+        // jonno restrict kora hoyeche (routes/api.php e 'super_admin' hisebe use hocche)
+        $middleware->alias([
+            'super_admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -13,11 +13,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Prothom super admin — role='admin', email already verified rakha hocche
+        // jate migrate:fresh --seed er por shathe shathe login kora jay
         User::factory()->create([
             'name' => 'Admin',
             'email' => 'admin@example.com',
+            'password' => bcrypt('password'), 
+            'role' => 'admin',
+            'email_verified_at' => now(),
         ]);
     }
 }
